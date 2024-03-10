@@ -1,6 +1,6 @@
 import { IUser } from '../types/user.types';
 
-export class User implements User {
+export class User implements IUser {
   id: string;
   login: string;
   version: number;

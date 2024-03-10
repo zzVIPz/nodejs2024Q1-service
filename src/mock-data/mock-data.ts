@@ -6,3 +6,11 @@ export const mockedUser = {
   updatedAt: 1710092385020,
   password: 'test-user',
 };
+
+export const mockedTrack = {
+  id: '0c072022-0e56-495a-96f1-3fc9f9183326',
+  name: 'test-track',
+  artistId: null,
+  albumId: null,
+  duration: 1,
+};
