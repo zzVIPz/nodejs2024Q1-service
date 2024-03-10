@@ -81,12 +81,7 @@ export class UsersService {
   };
 
   deleteUser = (id: string) => {
-    validateId(id);
-
-    const user = this.db.getUserById(id);
-
-    if (!user) throwNotFoundException(id);
-
+    this.getUserById(id);
     this.db.deleteUser(id);
   };
 }
