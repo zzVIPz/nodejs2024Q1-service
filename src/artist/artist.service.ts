@@ -49,14 +49,7 @@ export class ArtistService {
 
   deleteArtist = (id: string) => {
     this.getArtistById(id);
-
-    this.db.tracks.forEach((track) => {
-      if (track.artistId === id) {
-        track.artistId = null;
-      }
-    });
-
-    this.db.deleteArtist(id);
     this.db.deleteArtistReferences(id);
+    this.db.deleteArtist(id);
   };
 }

@@ -20,3 +20,10 @@ export const mockedArtist = {
   name: 'test-artist',
   grammy: true,
 };
+
+export const mockedAlbum = {
+  id: '9b8b1d19-3b2f-415c-b366-1408f47337bc',
+  name: 'test-album',
+  year: 2000,
+  artistId: null,
+};
