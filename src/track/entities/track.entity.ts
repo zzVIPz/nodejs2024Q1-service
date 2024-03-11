@@ -1,11 +1,11 @@
 import { ITrack } from '../types/track.types';
 
 export class Track implements ITrack {
-  id: string; // uuid v4
+  id: string;
   name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
-  duration: number; // integer number
+  artistId: string | null;
+  albumId: string | null;
+  duration: number;
 
   constructor({ id, name, artistId, albumId, duration }: Partial<ITrack>) {
     this.id = id;
