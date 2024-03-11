@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { mockedTrack, mockedUser } from 'src/mock-data/mock-data';
+import { IArtist } from 'src/artist/types/artist.types';
+import { mockedArtist, mockedTrack, mockedUser } from 'src/mock-data/mock-data';
 import { ITrack } from 'src/track/types/track.types';
 import { IUser } from 'src/user/types/user.types';
 
@@ -7,13 +8,16 @@ import { IUser } from 'src/user/types/user.types';
 export class DataService {
   users: Map<string, IUser>;
   tracks: Map<string, ITrack>;
+  artists: Map<string, IArtist>;
 
   constructor() {
     this.users = new Map<string, IUser>();
     this.tracks = new Map<string, ITrack>();
+    this.artists = new Map<string, IArtist>();
 
     this.users.set(mockedUser.id, mockedUser);
     this.tracks.set(mockedTrack.id, mockedTrack);
+    this.artists.set(mockedTrack.id, mockedArtist);
   }
 
   getAllUsers = () => Object.fromEntries(this.users.entries());
@@ -31,4 +35,20 @@ export class DataService {
   createTrack = (id: string, track: ITrack) => this.tracks.set(id, track);
 
   deleteTrack = (id: string) => this.tracks.delete(id);
+
+  getAllArtists = () => Object.fromEntries(this.artists.entries());
+
+  getArtistById = (id: string) => this.artists.get(id);
+
+  createArtist = (id: string, artist: IArtist) => this.artists.set(id, artist);
+
+  deleteArtist = (id: string) => this.artists.delete(id);
+
+  deleteArtistReferences = (id: string) => {
+    Object.values(this.getAllTracks()).forEach((track) => {
+      if (track.id === id) {
+        this.createTrack(id, { ...track, artistId: null });
+      }
+    });
+  };
 }

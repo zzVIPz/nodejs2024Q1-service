@@ -8,9 +8,15 @@ export const mockedUser = {
 };
 
 export const mockedTrack = {
-  id: '0c072022-0e56-495a-96f1-3fc9f9183326',
-  name: 'test-track',
+  id: '9cb553fb-8e86-4907-ada1-7cb5636dd17e',
+  name: 'test-track1',
   artistId: null,
   albumId: null,
   duration: 1,
+};
+
+export const mockedArtist = {
+  id: '985edf1e-47fe-41c1-9d80-867b32bc1090',
+  name: 'test-artist',
+  grammy: true,
 };
