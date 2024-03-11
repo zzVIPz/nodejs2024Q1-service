@@ -51,6 +51,7 @@ export class AlbumService {
   deleteAlbum = (id: string) => {
     this.getAlbumById(id);
     this.db.deleteAlbumReferences(id);
+    this.db.deleteFavorites('albums', id);
     this.db.deleteAlbum(id);
   };
 }

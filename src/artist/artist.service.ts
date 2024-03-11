@@ -50,6 +50,7 @@ export class ArtistService {
   deleteArtist = (id: string) => {
     this.getArtistById(id);
     this.db.deleteArtistReferences(id);
+    this.db.deleteFavorites('artists', id);
     this.db.deleteArtist(id);
   };
 }
