@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './user/user.module';
@@ -10,6 +11,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     DataModule,
     UsersModule,
     TracksModule,
