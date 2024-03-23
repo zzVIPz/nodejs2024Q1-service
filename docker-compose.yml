@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: nestjs-app
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/app/src
+  postgres:
+    container_name: postgres_db
+    restart: always
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    build:
+      context: ./src/data
+      dockerfile: ./Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - logs:/var/logs/postgresql
+
+volumes:
+  postgres_data:
+  logs:
+
+networks:
+  defaut:
+    driver: bridge
