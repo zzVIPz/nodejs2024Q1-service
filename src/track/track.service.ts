@@ -1,61 +1,57 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DataService } from 'src/data/data.service';
 import { Track } from './entities/track.entity';
 import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackInfoDto } from './dto/update-track-info.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly db: DataService) {}
+  constructor(
+    @InjectRepository(Track)
+    private readonly db: Repository<Track>,
+  ) {}
 
-  getAllTracks = () => Object.values(this.db.getAllTracks());
+  getAllTracks = async () => await this.db.find();
 
-  getTrackById = (id: string) => {
+  getTrackById = async (id: string) => {
     validateId(id);
 
-    const track = this.db.getTrackById(id);
+    const track = await this.db.findOneBy({ id });
 
     if (!track) throwNotFoundException(id);
 
     return track;
   };
 
-  createTrack = ({ name, artistId, albumId, duration }: CreateTrackDto) => {
-    if (!name) throw new BadRequestException(`Name is required`);
-    if (!duration) throw new BadRequestException(`Duration is required`);
+  createTrack = async (trackDto: CreateTrackDto) => {
+    if (!trackDto.name) throw new BadRequestException(`Name is required`);
+    if (!trackDto.duration)
+      throw new BadRequestException(`Duration is required`);
 
-    const track = new Track({
-      id: uuidv4(),
-      name,
-      artistId,
-      albumId,
-      duration,
-    });
+    const track = await this.db.save(trackDto);
 
-    this.db.createTrack(track.id, track);
-
-    return this.getTrackById(track.id);
+    return await this.getTrackById(track.id);
   };
 
-  updateTrackInfo = (id: string, dto: UpdateTrackInfoDto) => {
+  updateTrackInfo = async (id: string, dto: UpdateTrackInfoDto) => {
     if (!dto.name || !dto.duration)
       throw new BadRequestException('Name & Duration are required');
 
-    const track = this.getTrackById(id);
+    const track = await this.getTrackById(id);
 
-    this.db.createTrack(id, {
+    await this.db.save({
       ...track,
       ...dto,
     });
 
-    return this.getTrackById(id);
+    return await this.getTrackById(id);
   };
 
-  deleteTrack = (id: string) => {
-    this.getTrackById(id);
-    this.db.deleteFavorites('tracks', id);
-    this.db.deleteTrack(id);
+  deleteTrack = async (id: string) => {
+    await this.getTrackById(id);
+    await this.db.delete(id);
   };
 }
