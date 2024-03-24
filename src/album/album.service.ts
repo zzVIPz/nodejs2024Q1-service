@@ -1,57 +1,52 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DataService } from 'src/data/data.service';
 import { Album } from './entities/album.entity';
 import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumInfoDto } from './dto/update-album-info.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly db: DataService) {}
+  constructor(
+    @InjectRepository(Album)
+    private readonly db: Repository<Album>,
+  ) {}
 
-  getAllAlbums = () => Object.values(this.db.getAllAlbums());
+  getAllAlbums = async () => await this.db.find();
 
-  getAlbumById = (id: string) => {
+  getAlbumById = async (id: string) => {
     validateId(id);
 
-    const album = this.db.getAlbumById(id);
+    const album = await this.db.findOneBy({ id });
 
     if (!album) throwNotFoundException(id);
 
     return album;
   };
 
-  createAlbum = ({ name, year, artistId }: CreateAlbumDto) => {
-    if (!name) throw new BadRequestException(`Name is required`);
-    if (!year) throw new BadRequestException(`Year is required`);
+  createAlbum = async (albumDto: CreateAlbumDto) => {
+    if (!albumDto.name) throw new BadRequestException(`Name is required`);
+    if (!albumDto.year) throw new BadRequestException(`Year is required`);
 
-    const album = new Album({
-      id: uuidv4(),
-      name,
-      year,
-      artistId,
-    });
+    const album = await this.db.save(albumDto);
 
-    this.db.createAlbum(album.id, album);
-
-    return this.getAlbumById(album.id);
+    return await this.getAlbumById(album.id);
   };
 
-  updateAlbumInfo = (id: string, dto: UpdateAlbumInfoDto) => {
+  updateAlbumInfo = async (id: string, dto: UpdateAlbumInfoDto) => {
     if (!dto.name || !dto.year || typeof dto.year !== 'number')
       throw new BadRequestException('Name & Grammy are required');
 
-    this.getAlbumById(id);
-    this.db.createAlbum(id, { id, ...dto });
+    await this.getAlbumById(id);
+    await this.db.save({ id, ...dto });
 
-    return this.getAlbumById(id);
+    return await this.getAlbumById(id);
   };
 
-  deleteAlbum = (id: string) => {
-    this.getAlbumById(id);
-    this.db.deleteAlbumReferences(id);
-    this.db.deleteFavorites('albums', id);
-    this.db.deleteAlbum(id);
+  deleteAlbum = async (id: string) => {
+    await this.getAlbumById(id);
+    await this.db.delete(id);
   };
 }
