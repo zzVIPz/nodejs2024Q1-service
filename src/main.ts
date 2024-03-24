@@ -11,6 +11,9 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, apiDocs);
 
-  await app.listen(configService.get('PORT') || 4000);
+  const server = await app.listen(configService.get('PORT') || 4000);
+
+  process.on('SIGINT', () => server.close());
+  process.on('SIGTERM', () => server.close());
 }
 bootstrap();

@@ -8,6 +8,4 @@ RUN npm install
 
 COPY . .
 
-EXPOSE ${PORT}
-
-CMD ["npm", "run", "start:dev"]
+CMD npx prisma generate && npx prisma migrate dev --name init && npm run start:dev
