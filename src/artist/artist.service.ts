@@ -1,56 +1,52 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DataService } from 'src/data/data.service';
 import { Artist } from './entities/artist.entity';
 import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistInfoDto } from './dto/update-artist-info.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly db: DataService) {}
+  constructor(
+    @InjectRepository(Artist)
+    private readonly db: Repository<Artist>,
+  ) {}
 
-  getAllArtists = () => Object.values(this.db.getAllArtists());
+  getAllArtists = async () => await this.db.find();
 
-  getArtistById = (id: string) => {
+  getArtistById = async (id: string) => {
     validateId(id);
 
-    const artist = this.db.getArtistById(id);
+    const artist = await this.db.findOneBy({ id });
 
     if (!artist) throwNotFoundException(id);
 
     return artist;
   };
 
-  createArtist = ({ name, grammy }: CreateArtistDto) => {
-    if (!name) throw new BadRequestException(`Name is required`);
-    if (!grammy) throw new BadRequestException(`Grammy is required`);
+  createArtist = async (artistDto: CreateArtistDto) => {
+    if (!artistDto.name) throw new BadRequestException(`Name is required`);
+    if (!artistDto.grammy) throw new BadRequestException(`Grammy is required`);
 
-    const artist = new Artist({
-      id: uuidv4(),
-      name,
-      grammy,
-    });
+    const artist = await this.db.save(artistDto);
 
-    this.db.createArtist(artist.id, artist);
-
-    return this.getArtistById(artist.id);
+    return await this.getArtistById(artist.id);
   };
 
-  updateArtistInfo = (id: string, dto: UpdateArtistInfoDto) => {
+  updateArtistInfo = async (id: string, dto: UpdateArtistInfoDto) => {
     if (!dto.name || typeof dto.grammy !== 'boolean')
       throw new BadRequestException('Name & Grammy are required');
 
-    this.getArtistById(id);
-    this.db.createArtist(id, { id, ...dto });
+    await this.getArtistById(id);
+    await this.db.save({ id, ...dto });
 
-    return this.getArtistById(id);
+    return await this.getArtistById(id);
   };
 
-  deleteArtist = (id: string) => {
-    this.getArtistById(id);
-    this.db.deleteArtistReferences(id);
-    this.db.deleteFavorites('artists', id);
-    this.db.deleteArtist(id);
+  deleteArtist = async (id: string) => {
+    await this.getArtistById(id);
+    await this.db.delete(id);
   };
 }
