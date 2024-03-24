@@ -5,13 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { User } from './entities/user.entity';
-import {
-  serializeId,
-  throwNotFoundException,
-  validateId,
-} from 'src/utils/utils';
+import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 
@@ -23,13 +18,9 @@ export class UsersService {
   ) {}
 
   getAllUsers = async () =>
-    serializeId(
-      Object.values(
-        await this.db.find({
-          select: ['id', 'login', 'version', 'createdAt', 'updatedAt'],
-        }),
-      ),
-    );
+    await this.db.find({
+      select: ['id', 'login', 'version', 'createdAt', 'updatedAt'],
+    });
 
   getUserById = async (id: string) => {
     validateId(id);
@@ -45,17 +36,12 @@ export class UsersService {
     return userCopy;
   };
 
-  createUser = async ({ login, password }: CreateUserDto) => {
-    if (!login) throw new BadRequestException(`Login is required`);
-    if (!password) throw new BadRequestException(`Password is required`);
+  createUser = async (userDto: CreateUserDto) => {
+    if (!userDto.login) throw new BadRequestException(`Login is required`);
+    if (!userDto.password)
+      throw new BadRequestException(`Password is required`);
 
-    const user = new User({
-      id: uuidv4(),
-      login,
-      password,
-    });
-
-    await this.db.create(user);
+    const user = await this.db.save(userDto);
 
     return await this.getUserById(user.id);
   };
@@ -81,18 +67,16 @@ export class UsersService {
     if (oldPassword !== user.password)
       throw new ForbiddenException('Password is wrong');
 
-    this.db.update(id, {
+    await this.db.save({
       ...user,
       password: newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
     });
 
-    return this.getUserById(user.id);
+    return await this.getUserById(id);
   };
 
-  deleteUser = (id: string) => {
-    this.getUserById(id);
-    this.db.delete(id);
+  deleteUser = async (id: string) => {
+    await this.getUserById(id);
+    await this.db.delete(id);
   };
 }

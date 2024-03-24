@@ -1,32 +1,43 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { IUser } from '../types/user.types';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 
 @Entity('User')
-export class User implements IUser {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   login: string;
 
-  @Column('int')
+  @VersionColumn({ default: 1 })
   version: number;
 
-  @Column('int')
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: {
+      from: (value) => new Date(value).getTime(),
+      to: (value) => value,
+    },
+  })
   createdAt: number;
 
-  @Column('int')
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: {
+      from: (value) => new Date(value).getTime(),
+      to: (value) => value,
+    },
+  })
   updatedAt: number;
 
   @Column()
   password: string;
-
-  constructor({ login, password, id }: Partial<IUser>) {
-    this.id = id;
-    this.login = login;
-    this.version = 1;
-    this.createdAt = Date.now();
-    this.updatedAt = Date.now();
-    this.password = password;
-  }
 }
