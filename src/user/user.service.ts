@@ -3,8 +3,9 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { DataService } from 'src/data/data.service';
 import { User } from './entities/user.entity';
 import {
   serializeId,
@@ -16,14 +17,24 @@ import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly db: DataService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly db: Repository<User>,
+  ) {}
 
-  getAllUsers = () => serializeId(Object.values(this.db.getAllUsers()));
+  getAllUsers = async () =>
+    serializeId(
+      Object.values(
+        await this.db.find({
+          select: ['id', 'login', 'version', 'createdAt', 'updatedAt'],
+        }),
+      ),
+    );
 
-  getUserById = (id: string) => {
+  getUserById = async (id: string) => {
     validateId(id);
 
-    const user = this.db.getUserById(id);
+    const user = await this.db.findOneBy({ id });
 
     if (!user) throwNotFoundException(id);
 
@@ -34,7 +45,7 @@ export class UsersService {
     return userCopy;
   };
 
-  createUser = ({ login, password }: CreateUserDto) => {
+  createUser = async ({ login, password }: CreateUserDto) => {
     if (!login) throw new BadRequestException(`Login is required`);
     if (!password) throw new BadRequestException(`Password is required`);
 
@@ -44,12 +55,12 @@ export class UsersService {
       password,
     });
 
-    this.db.createUser(user.id, user);
+    await this.db.create(user);
 
-    return this.getUserById(user.id);
+    return await this.getUserById(user.id);
   };
 
-  updateUserPassword = (
+  updateUserPassword = async (
     id: string,
     { oldPassword, newPassword }: UpdateUserPasswordDto,
   ) => {
@@ -63,14 +74,14 @@ export class UsersService {
     )
       throw new BadRequestException('Password is wrong');
 
-    const user = this.db.getUserById(id);
+    const user = await this.db.findOneBy({ id });
 
     if (!user) throwNotFoundException(id);
 
     if (oldPassword !== user.password)
       throw new ForbiddenException('Password is wrong');
 
-    this.db.createUser(id, {
+    this.db.update(id, {
       ...user,
       password: newPassword,
       version: user.version + 1,
@@ -82,6 +93,6 @@ export class UsersService {
 
   deleteUser = (id: string) => {
     this.getUserById(id);
-    this.db.deleteUser(id);
+    this.db.delete(id);
   };
 }
