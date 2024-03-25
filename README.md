@@ -13,6 +13,8 @@ git clone {repository URL}
 
 ## Installing and running application
 
+- install docker and run docker daemon service
+
 - switch to develop-task2 branch
 
 - rename .env.example to .env
