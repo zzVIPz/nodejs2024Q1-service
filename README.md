@@ -11,20 +11,51 @@
 git clone {repository URL}
 ```
 
-## Installing NPM modules
+## Installing and running application
+
+- install docker and run docker daemon service
+
+- switch to develop-task2 branch
+
+- rename .env.example to .env
+
+- run
 
 ```
-npm install
+docker compose up
 ```
 
-## Running application
+- wait until images are downloaded and extracted
+- check logs to see app initializations successful status
+
+- run
 
 ```
-npm start
+run npm test
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+## Troubleshooting
+
+In case observing any issues with the app please check:
+
+- There are no internet connections problems because of firewall/proxy/internet provider and all dependencies are installed
+- DB was started - by using a cross-platform database tool (like DBeaver)
+- run
+
+```
+docker compose up --build
+```
+
+- If you still see issues, please feel free to reach out me in Discord
+
+## Api doc
+
+run application and navigate to:
+
+```
+http://localhost:4000/api
+```
+
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
