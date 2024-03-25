@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { Track } from './entities/track.entity';
 import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateTrackDto } from './dto/create-track.dto';

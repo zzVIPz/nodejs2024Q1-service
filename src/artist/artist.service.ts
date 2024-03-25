@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { Artist } from './entities/artist.entity';
 import { throwNotFoundException, validateId } from 'src/utils/utils';
 import { CreateArtistDto } from './dto/create-artist.dto';
