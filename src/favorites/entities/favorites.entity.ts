@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { FavoritesEnum } from '../types/favorites.types';
 
 @Entity('Favorite')
 export class Favorite {
@@ -7,7 +6,7 @@ export class Favorite {
   id: number;
 
   @Column()
-  entryType: FavoritesEnum;
+  entryType: string;
 
   @Column({ type: 'uuid' })
   entryId: string;

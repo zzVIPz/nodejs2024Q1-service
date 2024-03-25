@@ -8,4 +8,4 @@ RUN npm install
 
 COPY . .
 
-CMD npx prisma generate && npx prisma migrate dev --name init && npm run start:dev
+CMD npm run start:dev
