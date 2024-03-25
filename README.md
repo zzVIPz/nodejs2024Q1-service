@@ -13,6 +13,8 @@ git clone {repository URL}
 
 ## Installing and running application
 
+- switch to develop-task2 branch
+
 - rename .env.example to .env
 
 - run
